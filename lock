@@ -1,15 +1,12 @@
---// Camlock + UI Smoothness & Prediction
+--// Camlock + UI Smoothness & Prediction (Fix UI)
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
-local camlockOn = false
-local holdingRMB = false
-local allowSlot = false
-local target = nil
-local marker = nil
+local camlockOn, holdingRMB, allowSlot = false, false, false
+local target, marker = nil, nil
 
 -- Settings
 local Smoothness = 0.15
@@ -19,13 +16,18 @@ local Prediction = 0.12
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "CamlockUI"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+if syn and syn.protect_gui then
+    syn.protect_gui(ScreenGui)
+    ScreenGui.Parent = game.CoreGui
+else
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+end
 
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(0, 220, 0, 120)
-Main.Position = UDim2.new(0.05, 0, 0.6, 0)
-Main.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Main.BorderSizePixel = 1
+Main.Position = UDim2.new(0.35, 0, 0.65, 0)
+Main.BackgroundColor3 = Color3.fromRGB(30,30,30)
+Main.BorderColor3 = Color3.fromRGB(200,50,50)
 Main.Active = true
 Main.Draggable = true
 Main.Parent = ScreenGui
@@ -39,7 +41,7 @@ Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 16
 Title.Parent = Main
 
--- function tạo slider
+-- tạo slider
 local function makeSlider(name, min, max, default, order, callback)
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1,-20,0,30)
@@ -101,7 +103,7 @@ UIS.InputBegan:Connect(function(input,gpe)
     end
 end)
 
--- Helper
+-- Valid target
 local function valid(plr)
     if not plr or plr == LocalPlayer then return false end
     local char = plr.Character
@@ -116,11 +118,4 @@ local function addMarker(head)
     if marker then marker:Destroy() end
     marker = Instance.new("BillboardGui")
     marker.Size = UDim2.new(0,6,0,6)
-    marker.AlwaysOnTop = true
-    marker.Adornee = head
-    local dot = Instance.new("Frame", marker)
-    dot.Size = UDim2.new(1,0,1,0)
-    dot.BackgroundColor3 = Color3.new(1,0,0)
-    dot.BorderSizePixel = 0
-    dot.AnchorPoint = Vector2.new(0.5,0.5)
-    do
+    marker.Alwa
