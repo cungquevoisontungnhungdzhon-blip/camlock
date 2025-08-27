@@ -1,0 +1,147 @@
+--// Camlock + Status
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local camlockOn = false
+local holdingRMB = false
+local allowSlot = false
+local target = nil
+local marker = nil -- BillboardGui
+
+-- GUI Status Lock
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CamlockStatus"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(0,200,0,30)
+StatusLabel.Position = UDim2.new(0.5,-100,0.9,0)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.TextColor3 = Color3.new(1,1,1)
+StatusLabel.TextStrokeTransparency = 0
+StatusLabel.TextScaled = true
+StatusLabel.Font = Enum.Font.SourceSansBold
+StatusLabel.Text = "Locking: None"
+StatusLabel.Parent = ScreenGui
+
+-- Helper
+local function valid(plr)
+    if not plr or plr == LocalPlayer then return false end
+    local char = plr.Character
+    if not char then return false end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local head = char:FindFirstChild("Head")
+    return hum and hum.Health > 0 and head ~= nil
+end
+
+-- Red Dot Head
+local function addMarker(head)
+    if marker then marker:Destroy() end
+    marker = Instance.new("BillboardGui")
+    marker.Size = UDim2.new(0,6,0,6)
+    marker.AlwaysOnTop = true
+    marker.Adornee = head
+    local dot = Instance.new("Frame", marker)
+    dot.Size = UDim2.new(1,0,1,0)
+    dot.BackgroundColor3 = Color3.new(1,0,0)
+    dot.BorderSizePixel = 0
+    dot.AnchorPoint = Vector2.new(0.5,0.5)
+    dot.Position = UDim2.new(0.5,0,0.5,0)
+    marker.Parent = head
+end
+
+local function removeMarker()
+    if marker then
+        marker:Destroy()
+        marker = nil
+    end
+end
+
+-- Player
+local function closestToMouse()
+    local best, bestDist = nil, math.huge
+    local mousePos = UIS:GetMouseLocation() - Vector2.new(0,36)
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if valid(plr) then
+            local head = plr.Character.Head
+            local vp, onScreen = Camera:WorldToViewportPoint(head.Position)
+            if onScreen then
+                local d = (Vector2.new(vp.X,vp.Y) - mousePos).Magnitude
+                if d < bestDist then
+                    bestDist = d
+                    best = plr
+                end
+            end
+        end
+    end
+    return best
+end
+
+-- Tool?
+local function holdingTool()
+    return LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool") ~= nil
+end
+
+-- Input
+UIS.InputBegan:Connect(function(input,gpe)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        holdingRMB = true
+        return
+    end
+    if gpe then return end
+
+    if input.KeyCode == Enum.KeyCode.Q then
+        if camlockOn then
+            camlockOn = false
+            target = nil
+            removeMarker()
+            StatusLabel.Text = "Locking: None"
+        else
+            target = closestToMouse()
+            if target then
+                camlockOn = true
+                addMarker(target.Character.Head)
+                StatusLabel.Text = "Locking: " .. target.Name
+            end
+        end
+    elseif input.KeyCode == Enum.KeyCode.One
+        or input.KeyCode == Enum.KeyCode.Two
+        or input.KeyCode == Enum.KeyCode.Three then
+        allowSlot = true
+    elseif input.KeyCode == Enum.KeyCode.Four
+        or input.KeyCode == Enum.KeyCode.Five
+        or input.KeyCode == Enum.KeyCode.Six
+        or input.KeyCode == Enum.KeyCode.Seven
+        or input.KeyCode == Enum.KeyCode.Eight
+        or input.KeyCode == Enum.KeyCode.Nine
+        or input.KeyCode == Enum.KeyCode.Zero then
+        allowSlot = false
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        holdingRMB = false
+    end
+end)
+
+-- Loop
+RunService.RenderStepped:Connect(function()
+    if target and not valid(target) then
+        target = nil
+        camlockOn = false
+        removeMarker()
+        StatusLabel.Text = "Locking: None"
+        return
+    end
+
+    if camlockOn and holdingRMB and allowSlot and holdingTool() and target then
+        local head = target.Character.Head
+        Camera.CFrame = CFrame.new(Camera.CFrame.Position, head.Position)
+    end
+end)
