@@ -1,0 +1,6 @@
+--// Infinite Yeild
+loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+--// Hitbox Expander
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Qwoqeex/Hitbox-Expander/refs/heads/main/Hitboxes"))()
+--// Camlock by @bemeocutex_x
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cungquevoisontungnhungdzhon-blip/camlock/refs/heads/main/lock"))()
