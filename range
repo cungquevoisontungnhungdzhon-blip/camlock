@@ -10,17 +10,17 @@ local function setValues(v)
     end
 end
 
--- quét toàn map lúc đầu
+-- Checker
 for _,v in pairs(game:GetDescendants()) do
     setValues(v)
 end
 
--- nếu spawn thêm thì set tiếp
+-- Set
 game.DescendantAdded:Connect(function(v)
     setValues(v)
 end)
 
--- loop update liên tục (real-time)
+-- Loop Update
 while true do
     for _,v in pairs(game:GetDescendants()) do
         setValues(v)
