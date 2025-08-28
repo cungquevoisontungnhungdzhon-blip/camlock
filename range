@@ -1,33 +1,14 @@
--- Giá trị mong muốn
-local PATCH = {
-    Range = 1000000,
-    Ammo = 1000000,
-    MaxAmmo = 1000000,
-    ShootingCooldown = 0,
-    Cooldown = 0
-}
-
--- Hàm patch
-local function patch(v)
-    if PATCH[v.Name] ~= nil and (v:IsA("NumberValue") or v:IsA("IntValue")) then
-        -- Set ban đầu
-        if v.Value ~= PATCH[v.Name] then
-            v.Value = PATCH[v.Name]
-        end
-
-        -- Chỉ patch khi khác (tránh spam)
-        v.Changed:Connect(function(newVal)
-            if newVal ~= PATCH[v.Name] then
-                v.Value = PATCH[v.Name]
-            end
-        end)
+for _,v in pairs(game:GetDescendants()) do
+    if v:IsA("NumberValue") and v.Name == "Range" then
+        v.Value = 1000000
+        print("Set Range of", v.Parent.Name, "to", v.Value)
     end
 end
 
--- Scan ban đầu
-for _,v in ipairs(game:GetDescendants()) do
-    patch(v)
-end
-
--- Patch cho object mới tạo
-game.DescendantAdded:Connect(patch)
+-- auto update nếu game spawn thêm vũ khí mới
+game.DescendantAdded:Connect(function(v)
+    if v:IsA("NumberValue") and v.Name == "Range" then
+        v.Value = 1000000
+        print("Auto-set Range of", v.Parent.Name, "to", v.Value)
+    end
+end)
