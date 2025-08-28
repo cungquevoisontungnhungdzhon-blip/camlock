@@ -6,3 +6,5 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/Qwoqeex/Hitbox-Expand
 loadstring(game:HttpGet("https://raw.githubusercontent.com/cungquevoisontungnhungdzhon-blip/camlock/refs/heads/main/lock"))()
 --// RANGE AND COOLDOWN by @bemeocutex_x
 loadstring(game:HttpGet("https://raw.githubusercontent.com/cungquevoisontungnhungdzhon-blip/camlock/refs/heads/main/range"))()
+--// INF AMMO
+loadstring(game:HttpGet("https://raw.githubusercontent.com/cungquevoisontungnhungdzhon-blip/camlock/refs/heads/main/inf%20ammo"))()
