@@ -12,7 +12,7 @@ local allowSlot = false
 local target = nil
 local marker = nil -- BillboardGui
 
--- GUI hiển thị status lock
+-- GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "CamlockStatus"
 ScreenGui.ResetOnSpawn = false
@@ -29,7 +29,7 @@ StatusLabel.Font = Enum.Font.SourceSansBold
 StatusLabel.Text = "Locking: None"
 StatusLabel.Parent = ScreenGui
 
--- Helper: target hợp lệ?
+-- Helper
 local function valid(plr)
     if not plr or plr == LocalPlayer then return false end
     local char = plr.Character
@@ -39,7 +39,7 @@ local function valid(plr)
     return hum and hum.Health > 0 and head ~= nil
 end
 
--- Tạo chấm đỏ trên Head
+-- Red Dot
 local function addMarker(head)
     if marker then marker:Destroy() end
     marker = Instance.new("BillboardGui")
@@ -62,7 +62,7 @@ local function removeMarker()
     end
 end
 
--- Lấy player gần con trỏ
+-- Player
 local function closestToMouse()
     local best, bestDist = nil, math.huge
     local mousePos = UIS:GetMouseLocation() - Vector2.new(0,36)
@@ -82,7 +82,7 @@ local function closestToMouse()
     return best
 end
 
--- Đang cầm tool?
+-- Tool?
 local function holdingTool()
     return LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool") ~= nil
 end
