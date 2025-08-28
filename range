@@ -1,14 +1,29 @@
-for _,v in pairs(game:GetDescendants()) do
-    if v:IsA("NumberValue") and v.Name == "Range" then
-        v.Value = 1000000
-        print("Set Range of", v.Parent.Name, "to", v.Value)
+local function setValues(v)
+    if v:IsA("NumberValue") or v:IsA("IntValue") then
+        if v.Name == "Range" then
+            v.Value = 1000000
+        elseif v.Name == "Ammo" or v.Name == "MaxAmmo" then
+            v.Value = 1000000
+        elseif v.Name == "ShootingCooldown" or v.Name == "Cooldown" then
+            v.Value = 0
+        end
     end
 end
 
--- Auto Update
+-- quét toàn map lúc đầu
+for _,v in pairs(game:GetDescendants()) do
+    setValues(v)
+end
+
+-- nếu spawn thêm thì set tiếp
 game.DescendantAdded:Connect(function(v)
-    if v:IsA("NumberValue") and v.Name == "Range" then
-        v.Value = 1000000
-        print("Auto-set Range of", v.Parent.Name, "to", v.Value)
-    end
+    setValues(v)
 end)
+
+-- loop update liên tục (real-time)
+while true do
+    for _,v in pairs(game:GetDescendants()) do
+        setValues(v)
+    end
+    task.wait(0.3) -- nhanh hơn chút cho cooldown
+end
