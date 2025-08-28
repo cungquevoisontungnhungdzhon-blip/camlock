@@ -1,4 +1,4 @@
---// Camlock + Status
+--// Camlock with Auto Predict (WalkSpeed + Ping) + Red Dot Marker
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -12,23 +12,6 @@ local allowSlot = false
 local target = nil
 local marker = nil -- BillboardGui
 
--- GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CamlockStatus"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-local StatusLabel = Instance.new("TextLabel")
-StatusLabel.Size = UDim2.new(0,200,0,30)
-StatusLabel.Position = UDim2.new(0.5,-100,0.9,0)
-StatusLabel.BackgroundTransparency = 1
-StatusLabel.TextColor3 = Color3.new(1,1,1)
-StatusLabel.TextStrokeTransparency = 0
-StatusLabel.TextScaled = true
-StatusLabel.Font = Enum.Font.SourceSansBold
-StatusLabel.Text = "Locking: None"
-StatusLabel.Parent = ScreenGui
-
 -- Helper
 local function valid(plr)
     if not plr or plr == LocalPlayer then return false end
@@ -39,19 +22,36 @@ local function valid(plr)
     return hum and hum.Health > 0 and head ~= nil
 end
 
--- Red Dot
+-- Lấy ping (giây)
+local function getPing()
+    local stats = game:GetService("Stats")
+    local pingValue = stats.Network.ServerStatsItem["Data Ping"]:GetValue() or 0
+    return pingValue / 1000
+end
+
+-- Predict time = walkspeed + ping
+local function getPredictTime(hum)
+    local base = 0.1
+    if hum and hum.WalkSpeed then
+        base = math.clamp(hum.WalkSpeed / 200, 0.05, 0.25)
+    end
+    return base + getPing()
+end
+
+-- Marker (chấm đỏ)
 local function addMarker(head)
     if marker then marker:Destroy() end
     marker = Instance.new("BillboardGui")
     marker.Size = UDim2.new(0,6,0,6)
     marker.AlwaysOnTop = true
     marker.Adornee = head
-    local dot = Instance.new("Frame", marker)
+    local dot = Instance.new("Frame")
     dot.Size = UDim2.new(1,0,1,0)
     dot.BackgroundColor3 = Color3.new(1,0,0)
     dot.BorderSizePixel = 0
     dot.AnchorPoint = Vector2.new(0.5,0.5)
     dot.Position = UDim2.new(0.5,0,0.5,0)
+    dot.Parent = marker
     marker.Parent = head
 end
 
@@ -82,7 +82,7 @@ local function closestToMouse()
     return best
 end
 
--- Tool?
+-- Check tool
 local function holdingTool()
     return LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool") ~= nil
 end
@@ -100,13 +100,11 @@ UIS.InputBegan:Connect(function(input,gpe)
             camlockOn = false
             target = nil
             removeMarker()
-            StatusLabel.Text = "Locking: None"
         else
             target = closestToMouse()
             if target then
                 camlockOn = true
                 addMarker(target.Character.Head)
-                StatusLabel.Text = "Locking: " .. target.Name
             end
         end
     elseif input.KeyCode == Enum.KeyCode.One
@@ -136,12 +134,18 @@ RunService.RenderStepped:Connect(function()
         target = nil
         camlockOn = false
         removeMarker()
-        StatusLabel.Text = "Locking: None"
         return
     end
 
     if camlockOn and holdingRMB and allowSlot and holdingTool() and target then
-        local head = target.Character.Head
-        Camera.CFrame = CFrame.new(Camera.CFrame.Position, head.Position)
+        local head = target.Character:FindFirstChild("Head")
+        local hrp = target.Character:FindFirstChild("HumanoidRootPart")
+        local hum = target.Character:FindFirstChildOfClass("Humanoid")
+
+        if head and hrp and hum then
+            local predictTime = getPredictTime(hum)
+            local predicted = head.Position + (hrp.Velocity * predictTime)
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, predicted)
+        end
     end
 end)
