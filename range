@@ -5,7 +5,7 @@ for _,v in pairs(game:GetDescendants()) do
     end
 end
 
--- auto update nếu game spawn thêm vũ khí mới
+-- Auto Update
 game.DescendantAdded:Connect(function(v)
     if v:IsA("NumberValue") and v.Name == "Range" then
         v.Value = 1000000
