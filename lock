@@ -1,4 +1,4 @@
---// Camlock with Auto Predict (WalkSpeed + Ping) + Red Dot Marker
+--// Camlock with Wall Check + Red Dot Marker + Slot 1-3 Restriction
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -10,7 +10,7 @@ local camlockOn = false
 local holdingRMB = false
 local allowSlot = false
 local target = nil
-local marker = nil -- BillboardGui
+local marker = nil
 
 -- Helper
 local function valid(plr)
@@ -20,22 +20,6 @@ local function valid(plr)
     local hum = char:FindFirstChildOfClass("Humanoid")
     local head = char:FindFirstChild("Head")
     return hum and hum.Health > 0 and head ~= nil
-end
-
--- Lấy ping (giây)
-local function getPing()
-    local stats = game:GetService("Stats")
-    local pingValue = stats.Network.ServerStatsItem["Data Ping"]:GetValue() or 0
-    return pingValue / 1000
-end
-
--- Predict time = walkspeed + ping
-local function getPredictTime(hum)
-    local base = 0.1
-    if hum and hum.WalkSpeed then
-        base = math.clamp(hum.WalkSpeed / 200, 0.05, 0.25)
-    end
-    return base + getPing()
 end
 
 -- Marker (chấm đỏ)
@@ -62,7 +46,16 @@ local function removeMarker()
     end
 end
 
--- Player
+-- Wall check
+local function isVisible(part)
+    local origin = Camera.CFrame.Position
+    local direction = (part.Position - origin)
+    local ray = Ray.new(origin, direction.Unit * direction.Magnitude)
+    local hit = workspace:FindPartOnRay(ray, LocalPlayer.Character, false, true)
+    return hit == nil or hit:IsDescendantOf(part.Parent)
+end
+
+-- Player (ưu tiên gần chuột)
 local function closestToMouse()
     local best, bestDist = nil, math.huge
     local mousePos = UIS:GetMouseLocation() - Vector2.new(0,36)
@@ -128,7 +121,7 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- Loop
+-- Main loop
 RunService.RenderStepped:Connect(function()
     if target and not valid(target) then
         target = nil
@@ -139,13 +132,10 @@ RunService.RenderStepped:Connect(function()
 
     if camlockOn and holdingRMB and allowSlot and holdingTool() and target then
         local head = target.Character:FindFirstChild("Head")
-        local hrp = target.Character:FindFirstChild("HumanoidRootPart")
-        local hum = target.Character:FindFirstChildOfClass("Humanoid")
-
-        if head and hrp and hum then
-            local predictTime = getPredictTime(hum)
-            local predicted = head.Position + (hrp.Velocity * predictTime)
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, predicted)
+        if head then
+            if isVisible(head) then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, head.Position)
+            end
         end
     end
 end)
