@@ -1,29 +1,43 @@
+local values = {} -- Save Object
+
+-- Set
 local function setValues(v)
     if v:IsA("NumberValue") or v:IsA("IntValue") then
         if v.Name == "Range" then
             v.Value = 1000000
+            table.insert(values, v)
         elseif v.Name == "Ammo" or v.Name == "MaxAmmo" then
             v.Value = 1000000
+            table.insert(values, v)
         elseif v.Name == "ShootingCooldown" or v.Name == "Cooldown" then
             v.Value = 0
+            table.insert(values, v)
         end
     end
 end
 
--- Checker
+-- Check
 for _,v in pairs(game:GetDescendants()) do
     setValues(v)
 end
 
--- Set
+-- Spawn
 game.DescendantAdded:Connect(function(v)
     setValues(v)
 end)
 
--- Loop Update
+-- Value
 while true do
-    for _,v in pairs(game:GetDescendants()) do
-        setValues(v)
+    for _,v in pairs(values) do
+        if v and v.Parent then
+            if v.Name == "Range" then
+                v.Value = 1000000
+            elseif v.Name == "Ammo" or v.Name == "MaxAmmo" then
+                v.Value = 1000000
+            elseif v.Name == "ShootingCooldown" or v.Name == "Cooldown" then
+                v.Value = 0
+            end
+        end
     end
-    task.wait(0.3) -- nhanh hơn chút cho cooldown
+    task.wait(1) -- update mỗi 1s thôi, không lag
 end
