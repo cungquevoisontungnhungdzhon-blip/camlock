@@ -39,5 +39,5 @@ while true do
             end
         end
     end
-    task.wait(1) -- update mỗi 1s thôi, không lag
+    task.wait(1) -- update 1s
 end
