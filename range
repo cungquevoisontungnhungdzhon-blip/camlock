@@ -1,37 +1,37 @@
--- Value
+-- Patch
 local function patch(v)
     if not (v:IsA("NumberValue") or v:IsA("IntValue")) then return end
 
     if v.Name == "Range" then
-        v.Value = 1000000
         v.Changed:Connect(function()
             if v.Value ~= 1000000 then
                 v.Value = 1000000
             end
         end)
+        v.Value = 1000000
 
     elseif v.Name == "Ammo" or v.Name == "MaxAmmo" then
-        v.Value = 1000000
         v.Changed:Connect(function()
             if v.Value ~= 1000000 then
                 v.Value = 1000000
             end
         end)
+        v.Value = 1000000
 
     elseif v.Name == "ShootingCooldown" or v.Name == "Cooldown" then
-        v.Value = 0
         v.Changed:Connect(function()
             if v.Value ~= 0 then
                 v.Value = 0
             end
         end)
+        v.Value = 0
     end
 end
 
--- Checker
+-- Scan
 for _,v in ipairs(game:GetDescendants()) do
     patch(v)
 end
 
--- Object
+-- Patch
 game.DescendantAdded:Connect(patch)
