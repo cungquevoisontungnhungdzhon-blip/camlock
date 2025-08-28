@@ -1,0 +1,26 @@
+-- Infinite ammo + 0 cooldown
+-- Dán vào executor
+
+local plr = game.Players.LocalPlayer
+local rs = game:GetService("ReplicatedStorage")
+local run = game:GetService("RunService")
+
+-- Auto patch ammo & cooldown cho mọi tool đang cầm
+run.RenderStepped:Connect(function()
+    local char = plr.Character
+    if not char then return end
+    local tool = char:FindFirstChildOfClass("Tool")
+    if not tool then return end
+
+    -- Ammo
+    local ammo = tool:FindFirstChild("Ammo")
+    if ammo and ammo.Value ~= 999999 then
+        ammo.Value = 999999
+    end
+
+    -- ShootingCooldown
+    local cd = tool:FindFirstChild("ShootingCooldown")
+    if cd and cd.Value ~= 0 then
+        cd.Value = 0
+    end
+end)
