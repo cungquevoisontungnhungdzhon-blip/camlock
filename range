@@ -1,0 +1,14 @@
+for _,v in pairs(game:GetDescendants()) do
+    if v:IsA("NumberValue") and v.Name == "Range" then
+        v.Value = 1000000
+        print("Set Range of", v.Parent.Name, "to", v.Value)
+    end
+end
+
+-- Auto Update
+game.DescendantAdded:Connect(function(v)
+    if v:IsA("NumberValue") and v.Name == "Range" then
+        v.Value = 1000000
+        print("Auto-set Range of", v.Parent.Name, "to", v.Value)
+    end
+end)
